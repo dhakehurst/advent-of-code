@@ -1,3 +1,5 @@
+package task_01_1
+
 import korlibs.io.file.std.resourcesVfs
 
 suspend fun main() {
