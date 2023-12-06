@@ -1,6 +1,6 @@
 package day_05
 
-fun task1(lines: List<String>) {
+fun task1(lines: List<String>): Long {
 
     val seeds = lines[0].substringAfter(":").split(" ").mapNotNull { it.trim().toLongOrNull() }
     val mappers = mutableListOf<Mapper>()
@@ -21,4 +21,5 @@ fun task1(lines: List<String>) {
         }
     }
     println("Min: ${locations.min()}")
+    return locations.min()
 }

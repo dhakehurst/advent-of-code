@@ -1,14 +1,14 @@
 package day_05
 
-fun task2(lines: List<String>) = task2_1(lines)
+fun task2(lines: List<String>) = task2_3(lines)
 
 // just iterate for a long time ;-)
-fun task2_1(lines: List<String>) {
+fun task2_1(lines: List<String>):Long {
     val seeds = lines[0].substringAfter(":").split(" ").mapNotNull { it.trim().toLongOrNull() }
-    val seeds2 = mutableListOf<Range>()
+    val seeds2 = mutableListOf<LongRange>()
     var i = 0
     while(i < seeds.size) {
-        seeds2.add(Range(seeds[i], seeds[i+1]))
+        seeds2.add(LongRange(seeds[i], seeds[i]+seeds[i+1]-1))
         i += 2
     }
 
@@ -34,10 +34,11 @@ fun task2_1(lines: List<String>) {
         }
     }
     println("Min: ${locations.min()}")
+    return locations.min()
 }
 
 // try to work backwards.....does not work! - am missing something
-fun task2_2(lines: List<String>) {
+fun task2_2(lines: List<String>) :Long {
     val seeds = lines[0].substringAfter(":").split(" ").mapNotNull { it.trim().toLongOrNull() }
     val seeds2 = mutableListOf<Range>()
     var i = 0
@@ -83,15 +84,16 @@ fun task2_2(lines: List<String>) {
         }
     }
     println("Min: ${locations.min()}")
+    return locations.min()
 }
 
-// use range intersections....in-work
-fun task2_3(lines: List<String>) {
+// use range intersections.
+fun task2_3(lines: List<String>):Long {
     val seeds = lines[0].substringAfter(":").split(" ").mapNotNull { it.trim().toLongOrNull() }
-    val seeds2 = mutableListOf<Range>()
+    val seeds2 = mutableListOf<LongRange>()
     var i = 0
     while(i < seeds.size) {
-        seeds2.add(Range(seeds[i], seeds[i+1]))
+        seeds2.add(LongRange(seeds[i], seeds[i]+seeds[i+1]-1))
         i += 2
     }
 
@@ -107,9 +109,10 @@ fun task2_3(lines: List<String>) {
         }
     }
 
-    val locRanges = mappers.fold(seeds2 as List<Range>) { acc, mpr ->
+    val locRanges = mappers.fold(seeds2 as List<LongRange>) { acc, mpr ->
         mpr.mapRanges(acc)
     }
 
-    println("Min: ${locRanges.minOf { it.start }}")
+    println("Min: ${locRanges.minOf { it.first }}")
+    return locRanges.minOf { it.first }
 }

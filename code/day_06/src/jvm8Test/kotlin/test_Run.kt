@@ -1,4 +1,4 @@
-package day_05
+package day_06
 
 import korlibs.io.async.suspendTest
 import korlibs.io.file.std.resourcesVfs
@@ -18,15 +18,14 @@ class test_Run {
     @Test
     fun run_task1() {
         val actual = task1(lines)
-        val expected = 389056265L
+        val expected = 2344708L
         assertEquals(expected, actual)
     }
 
     @Test
     fun run_task2() {
         val actual = task2(lines)
-        val expected = 137516820L
+        val expected = 30125202L
         assertEquals(expected, actual)
     }
-
 }
