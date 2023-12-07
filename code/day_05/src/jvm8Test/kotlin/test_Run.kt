@@ -5,6 +5,7 @@ import korlibs.io.file.std.resourcesVfs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.measureTimedValue
 
 class test_Run {
 
@@ -24,7 +25,11 @@ class test_Run {
 
     @Test
     fun run_task2() {
-        val actual = task2(lines)
+       val dv= measureTimedValue {
+            task2(lines)
+        }
+        println("Duration: ${dv.duration.inWholeMicroseconds} us")
+        val actual = dv.value
         val expected = 137516820L
         assertEquals(expected, actual)
     }
