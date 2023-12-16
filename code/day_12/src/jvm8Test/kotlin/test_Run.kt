@@ -32,7 +32,7 @@ class test_Run {
         println("Duration: ${result.duration.inWholeMicroseconds} us")
         val actual = result.value
         println("Day 12 task 2: $actual")
-        val expected = 0L
+        val expected = 18093821750095L
         assertEquals(expected, actual)
     }
 }

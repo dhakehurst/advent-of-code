@@ -267,10 +267,10 @@ enum class Expect { ANY, DOT, HASH }
 fun countMatchesHashesIntoGaps(groups: List<Int>, record: String): Long {
     val gaps = record.count { it == '?' }
     val neededHashes = groups.sum() - record.count { it == '#' }
-    println("$record, $groups")
-    println("len: ${record.length}")
-    println("groups: ${groups.size}")
-    println("neededHashes: $neededHashes into: $gaps")
+//    println("$record, $groups")
+//    println("len: ${record.length}")
+//    println("groups: ${groups.size}")
+//    println("neededHashes: $neededHashes into: $gaps")
     val p = PatternAsLongs(record, groups, Expect.ANY)
     cache3.clear()
     //distribute( neededHashes, gaps)
@@ -304,7 +304,7 @@ fun task2(lines: List<String>): Long {
         //val regEx = toRegEx(groupSizes2)
         //val alternativeCount = countMatchesOptionsFromGroups(groupSizes2, record2)
         val alternativeCount = countMatchesHashesIntoGaps(groupSizes2, record2)
-        println("ways: $alternativeCount")
+        //println("ways: $alternativeCount")
         total += alternativeCount
     }
 
