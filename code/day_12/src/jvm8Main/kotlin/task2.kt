@@ -98,30 +98,10 @@ fun distribute(balls: Int, boxes: Int, distribution: List<Int> = emptyList()): L
     }
 }
 
-fun countMatchDistribute(groups: List<Int>, pattern: PatternAsLongs, balls: Int, boxes: Int, distribution: List<Int> = emptyList()): Long {
-    return if (boxes == 1) {
-        //println((distribution + balls).joinToString())
-        val opt = distribution + balls
-//        val s = genStr(opt,groups)
-//        println(s)
-        val r = when {
-            pattern.matches(BitString(genLong(opt, groups))) -> 1L
-            else -> 0L
-        }
-//        println("try matching: ($r) ${genLong(opt, groups).toString(2)}")
-        r
-    } else {
-        var count = 0L
-        for (i in 0..min(1, balls)) {
-            count += countMatchDistribute(groups, pattern, balls - i, boxes - 1, distribution + i)
-        }
-        count
-    }
-}
-
 data class PatternAsLongs(
     val str: String,
-    val groups: List<Int>
+    val groups: List<Int>,
+    val expect: Expect
 ) {
     val hashes = BitString(str.asBinaryULong("#"))
     val dots = BitString(str.asBinaryULong("."))
@@ -149,45 +129,10 @@ data class PatternAsLongs(
     }
 }
 
-// count how many from the distribution will match the pattern
-// boxes are the '?', balls are the missing '#'
-//
-val cache = mutableMapOf<Pair<Int, Int>, Long>()
-fun countMatchDistribute2(pattern: PatternAsLongs, balls: Int, boxes: Int, distribution: List<Int> = emptyList()): Long {
-    val res = when {
-        boxes == 1 -> {
-            //println((distribution + balls).joinToString())
-            val opt = distribution + balls
-//        val s = genStr(opt,groups)
-//        println(s)
-            val r = when {
-                balls > 1 -> 0L
-                pattern.matches(pattern.fillBlanksWith(opt.toBitString)) -> {
-                    1L
-                }
-
-                else -> 0L
-            }
-            //println("try matching: ($r) ${pattern.fillBlanksWith(opt.toBitString)}")
-            r
-        }
-
-        else -> {
-            var count = 0L
-            for (i in 0..min(1, balls)) {
-                count += countMatchDistribute2(pattern, balls - i, boxes - 1, distribution + i)
-            }
-            count
-
-        }
-    }
-    //cache[Pair(balls, boxes)] = res
-    return res
-}
-
 data class CacheKey(
     val c1: String,
-    val c2: List<Int>
+    val c2: List<Int>,
+    val c3:Expect
 )
 
 val cache3 = mutableMapOf<CacheKey, Long>()
@@ -196,9 +141,6 @@ fun submatch(str: String, wanted: List<Int>): Long {
     return if (curGrps == wanted) 1 else 0
 }
 
-val String.code get() = Pair(this.asBinaryULong("#?"), this.asBinaryULong(".?"))
-
-fun String.groups(chars: String) = BitString(this.asBinaryULong(chars)).groups
 fun dgroupDiff(gMain: List<Int>, grp: Int?): List<Int> {
     return when {
         gMain.isEmpty() -> gMain
@@ -212,21 +154,24 @@ fun hgroupDiff(gMain: List<Int>, grp: Int?): List<Int> {
         null == grp -> gMain
         gMain.isEmpty() -> gMain
         //grp == gMain.first() -> gMain.drop(1)
-        else -> listOf(gMain.first() - 1) + gMain.drop(1)
+        else -> {
+            val gf = gMain.first()
+            listOf(gf - 1) + gMain.drop(1)
+        }
     }
 }
 
 fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes: Int): Long {
-    val key = CacheKey(pattern.str, pattern.groups)
+    val key = CacheKey(pattern.str, pattern.groups, pattern.expect)
     val cached = cache3[key]
     return if (null == cached) {
         val v = when {
             pattern.str.length == 0 -> when {
-                0==pattern.groups.sum() -> 1L
+                0 == pattern.groups.sum() -> 1L
                 else -> 0L
             }
 
-            0 == boxes  -> {
+            0 == boxes -> {
                 val ch = pattern.str[0]
                 val ng = when (ch) {
                     '.' -> dgroupDiff(pattern.groups, 1)
@@ -235,41 +180,72 @@ fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes
                 }
                 submatch(pattern.str, ng)
             }
-            0==balls -> when  {
-                0==pattern.groups.sum() -> 1L
-                else -> 0L
+
+            pattern.groups.isEmpty() -> {
+                submatch(pattern.str, emptyList())
             }
+
+//            0 == balls -> when {
+//                0 == pattern.groups.sum() -> 1L
+//                else -> 0L
+//            }
+
             else -> {
                 val ch = pattern.str[0]
                 val rhs = pattern.str.substr(1)
                 when (ch) {
-                    '.' -> {
-                        val ng = dgroupDiff(pattern.groups, 1)
-                        countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng), balls, boxes)
-                    }
-
-                    '#' -> {
-                        val ng = hgroupDiff(pattern.groups, 1)
-                        if (ng.isEmpty() || ng.first() < 0) {
-                            0L
-                        } else {
-                            countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng), balls, boxes)
+                    '.' -> when {
+                        pattern.expect == Expect.HASH -> 0L
+                        else -> {
+                            val ng = dgroupDiff(pattern.groups, 1)
+                            val nx = when {
+                                else -> Expect.ANY
+                            }
+                            countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng, nx), balls, boxes)
                         }
                     }
+
+                    '#' -> when {
+                        pattern.expect == Expect.DOT -> 0L
+                        pattern.groups.first() == 0 -> 0L //end of group should be  a'.'
+                        else -> {
+                            val ng = hgroupDiff(pattern.groups, 1)
+                            val nx = when {
+                                pattern.groups.first()==1 -> Expect.DOT
+                                else -> Expect.HASH
+                            }
+                            countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng, nx), balls, boxes)
+                        }
+                    }
+
 
                     '?' -> {
                         var count = 0L
                         // first try '.'
-                        val dgroupsDiff = dgroupDiff(pattern.groups, 1)
-                        val dc = countMatchDistribute3(start + 1, PatternAsLongs(rhs, dgroupsDiff), balls, boxes - 1)
+                        val dc = when {
+                            pattern.expect == Expect.HASH -> 0L
+                            else -> {
+                                val dgroupsDiff = dgroupDiff(pattern.groups, 1)
+                                val nx = when {
+                                    else -> Expect.ANY
+                                }
+                                countMatchDistribute3(start + 1, PatternAsLongs(rhs, dgroupsDiff, nx), balls, boxes - 1)
+                            }
+                        }
                         count += dc
 
                         // then '#'
-                        val ng = hgroupDiff(pattern.groups, 1)
-                        val hc = if (ng.isEmpty() || ng.first() < 0) {
-                            0L
-                        } else {
-                            countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng), balls, boxes)
+                        val hc = when {
+                            pattern.expect == Expect.DOT -> 0L
+                            pattern.groups.first() == 0 -> 0L
+                            else -> {
+                                val ng = hgroupDiff(pattern.groups, 1)
+                                val nx = when {
+                                    pattern.groups.first()==1 -> Expect.DOT
+                                    else -> Expect.HASH
+                                }
+                                countMatchDistribute3(start + 1, PatternAsLongs(rhs, ng, nx), balls - 1, boxes - 1)
+                            }
                         }
                         count += hc
                         count
@@ -279,34 +255,14 @@ fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes
                 }
             }
         }
-        //cache3[key] = v
+        cache3[key] = v
         v
     } else {
         cached
     }
 }
 
-
-fun countMatchesOptionsFromGroups(groups: List<Int>, record: String): Long {
-    //val patternStr = record.replace('.', '_').replace('?', '.').replace("_", "[.]")
-    //val pattern = Regex(patternStr)
-    val p = PatternAsLongs(record, groups)
-    //val pattern = toRegEx(groups)
-    val length = record.length
-    val diff = length - groups.sum() - (groups.size - 1)
-    val numGaps = groups.size + 1
-    //val options = distribute(diff, numGaps)
-//    println(p.toString())
-    println("groups: z=${groups.size} s=${groups.sum()} $groups")
-//    println("diff: $diff")
-//    println("numGaps: $numGaps")
-    println("balls: $diff  boxes: $numGaps")
-    val count = when (diff) {
-        0 -> 1
-        else -> countMatchDistribute(groups, p, diff, numGaps)
-    }
-    return count
-}
+enum class Expect { ANY, DOT, HASH }
 
 fun countMatchesHashesIntoGaps(groups: List<Int>, record: String): Long {
     val gaps = record.count { it == '?' }
@@ -315,7 +271,7 @@ fun countMatchesHashesIntoGaps(groups: List<Int>, record: String): Long {
     println("len: ${record.length}")
     println("groups: ${groups.size}")
     println("neededHashes: $neededHashes into: $gaps")
-    val p = PatternAsLongs(record, groups)
+    val p = PatternAsLongs(record, groups, Expect.ANY)
     cache3.clear()
     //distribute( neededHashes, gaps)
     val count = countMatchDistribute3(0, p, neededHashes, gaps)
@@ -347,7 +303,7 @@ fun task2(lines: List<String>): Long {
         val groupSizes2 = groupSizes + groupSizes + groupSizes + groupSizes + groupSizes
         //val regEx = toRegEx(groupSizes2)
         //val alternativeCount = countMatchesOptionsFromGroups(groupSizes2, record2)
-        val alternativeCount = countMatchesHashesIntoGaps(groupSizes, record)
+        val alternativeCount = countMatchesHashesIntoGaps(groupSizes2, record2)
         println("ways: $alternativeCount")
         total += alternativeCount
     }
