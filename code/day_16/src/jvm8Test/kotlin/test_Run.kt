@@ -1,4 +1,4 @@
-package day_12
+package day_16
 
 import korlibs.io.async.suspendTest
 import korlibs.io.file.std.resourcesVfs
@@ -13,14 +13,14 @@ class test_Run {
 
     @BeforeTest
     fun before() = suspendTest {
-        lines = resourcesVfs["test2.txt"].readLines().toList()
+        lines = resourcesVfs["input.txt"].readLines().toList()
     }
 
     @Test
     fun run_task1() {
         val actual = task1(lines)
-        println("Day 12 task 1: $actual")
-        val expected = 0L
+        println("Day 16 task 1: $actual")
+        val expected = 8389
         assertEquals(expected, actual)
     }
 
@@ -31,8 +31,9 @@ class test_Run {
         }
         println("Duration: ${result.duration.inWholeMicroseconds} us")
         val actual = result.value
-        println("Day 12 task 2: $actual")
-        val expected = 0L
+        println("Day 16 task 2: $actual")
+        val expected = 8564
         assertEquals(expected, actual)
     }
+
 }
