@@ -11,7 +11,7 @@ class test_matchFunction {
         val grps = listOf(0)
 
         val actual = countMatchesHashesIntoGaps(grps, str)
-        assertEquals(0, actual)
+        assertEquals(1, actual)
     }
 
     @Test

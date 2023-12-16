@@ -20,7 +20,7 @@ class test_Run {
     fun run_task1() {
         val actual = task1(lines)
         println("Day 12 task 1: $actual")
-        val expected = 0L
+        val expected = 7922L
         assertEquals(expected, actual)
     }
 

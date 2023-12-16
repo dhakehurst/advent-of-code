@@ -210,6 +210,7 @@ fun dgroupDiff(gMain: List<Int>, grp: Int?): List<Int> {
 fun hgroupDiff(gMain: List<Int>, grp: Int?): List<Int> {
     return when {
         null == grp -> gMain
+        gMain.isEmpty() -> gMain
         //grp == gMain.first() -> gMain.drop(1)
         else -> listOf(gMain.first() - 1) + gMain.drop(1)
     }
@@ -217,17 +218,16 @@ fun hgroupDiff(gMain: List<Int>, grp: Int?): List<Int> {
 
 fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes: Int): Long {
     val key = CacheKey(pattern.str, pattern.groups)
-
-    if (balls > boxes) return 0L
-    if (pattern.str.isEmpty()) return when (pattern.groups) {
-        listOf(0) -> 1L
-        else -> 0L
-    }
     val cached = cache3[key]
     return if (null == cached) {
-        val ch = pattern.str[0]
-        val c = when {
-            0 == boxes -> {
+        val v = when {
+            pattern.str.length == 0 -> when {
+                0==pattern.groups.sum() -> 1L
+                else -> 0L
+            }
+
+            0 == boxes  -> {
+                val ch = pattern.str[0]
                 val ng = when (ch) {
                     '.' -> dgroupDiff(pattern.groups, 1)
                     '#' -> pattern.groups
@@ -235,12 +235,12 @@ fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes
                 }
                 submatch(pattern.str, ng)
             }
-            1 == boxes -> when(balls) {
-                0 -> 0L
-                1 -> 1L
-                else -> TODO()
+            0==balls -> when  {
+                0==pattern.groups.sum() -> 1L
+                else -> 0L
             }
             else -> {
+                val ch = pattern.str[0]
                 val rhs = pattern.str.substr(1)
                 when (ch) {
                     '.' -> {
@@ -277,11 +277,10 @@ fun countMatchDistribute3(start: Int, pattern: PatternAsLongs, balls: Int, boxes
 
                     else -> error("")
                 }
-
             }
         }
-//        cache3[key] = c
-        c
+        //cache3[key] = v
+        v
     } else {
         cached
     }
