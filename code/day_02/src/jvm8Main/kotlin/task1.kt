@@ -1,35 +1,48 @@
 package day_02
 
-fun task1(lines: List<String>) {
-    val max = mapOf(
-        "red" to 12,
-        "green" to 13,
-        "blue" to 14
-    )
-    var total = 0
 
-    for(line in lines) {
-        val game = line.substringBefore(":")
-        val gameNumber = game.substring(5).toInt()
-        val sets = line.substringAfter(":").split(";")
-        var setsOK = true
-        for (set in sets) {
-            val groups = set.split(",")
-            var grpsOK = true
-            for(grp in groups) {
-                val num = grp.trim().substringBefore(" ").toInt()
-                val col = grp.trim().substringAfter(" ")
-                if (max[col]!! < num) {
-                    grpsOK = false
+fun task1(lines: List<String>) {
+
+    println("num lines: "+lines.size)
+    var total = 0
+    for (line in lines) {
+        val nums = line.split(" ").map { it.trim().toInt() }
+        val fv1 = nums[0]
+        val fv2 = nums[1]
+        val increases = when {
+            fv1 < fv2 -> true
+            fv1 > fv2 -> false
+            else -> continue
+        }
+
+        val duplicates = nums.toSet().size != nums.size
+        if (duplicates) {
+            continue
+        }
+        var safe = true
+        for (i in 0 until nums.size - 1) {
+            val v1 = nums[i]
+            val v2 = nums[i + 1]
+            val diff = when {
+                increases -> v2 - v1
+                else -> v1 - v2
+            }
+            when {
+                diff <= 0 -> {
+                    safe = false
+                    break
+                }
+
+                diff <= 3 -> Unit
+                else -> {
+                    safe = false
+                    break
                 }
             }
-            if (grpsOK.not()) {
-                setsOK = false
-            }
         }
-        if (setsOK) {
-            total += gameNumber
-        }
+        if (safe) total += 1
+
     }
+
     println("Day 02 task 1: $total")
 }

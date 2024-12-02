@@ -26,7 +26,7 @@ class test_Run {
     @Test
     fun run_task2() {
         val d = measureTime {
-            task2(lines)
+            task2b(lines)
         }
         println("Duration: ${d.inWholeMicroseconds} us")
     }
