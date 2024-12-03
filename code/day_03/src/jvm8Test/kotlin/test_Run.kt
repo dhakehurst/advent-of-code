@@ -15,9 +15,9 @@ class test_Run {
     }
 
     @Test
-    fun run_task1() = task1(lines)
+    fun run_task1() = day_03.task1.task1(lines)
 
     @Test
-    fun run_task2() = task2(lines)
+    fun run_task2() = day_03.task2.task2(lines)
 
 }

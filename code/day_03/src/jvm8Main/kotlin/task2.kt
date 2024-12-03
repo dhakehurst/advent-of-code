@@ -1,78 +1,45 @@
-package day_03
+package day_03.task2
 
-import kotlin.math.max
-import kotlin.math.min
-
-data class GeatAtHasNumAt(
-    val gi: Int,
-    val gj: Int,
-    val num: Int,
-    val ni:Int,
-    val nj:Int
+data class Instruction(
+    val ins:String,
+    val arg1:Int,
+    val arg2:Int
 )
 
+val expr = Regex("(don[']t[(][)])|(do[(][)])|((mul)[(]([0-9]+)[,]([0-9]+)[)])")
+fun process(str:String) :List<Instruction>{
+    return expr.findAll(str).map {
+        val ins = when {
+            null!=it.groups[1] -> it.groups[1]!!.value
+            null!=it.groups[2] -> it.groups[2]!!.value
+            null!=it.groups[4] -> it.groups[4]!!.value
+            else -> error("should not happen")
+        }
+        val v1 = it.groups[5]?.value?.toInt() ?: 0
+        val v2 = it.groups[6]?.value?.toInt() ?: 0
+        Instruction(ins,v1,v2)
+    }.toList()
+}
+
+fun runit(prog:List<Instruction>):Int {
+    var on = true
+    var tot = 0
+    for(ins in prog) {
+        when(ins.ins) {
+            "mul" -> if (on) {tot += ins.arg1*ins.arg2}
+            "do()" -> on = true
+            "don't()" -> on = false
+        }
+    }
+    return tot
+}
+
 fun task2(lines: List<String>) {
-    var total = 0
+    val test2 = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))\n"
+    val inp = lines.joinToString("")
+    val prog = process(inp)
+    val total = runit(prog)
 
-    val gearNums = mutableListOf<GeatAtHasNumAt>()
 
-    val numEx = Regex("[0-9]+")
-    val symEx = Regex("[^.0-9]")
-    val gearEx = Regex("[*]")
-    for (i in lines.indices) {
-        val line = lines[i]
-
-        var j = 0
-        while (j < line.length) {
-            val m = numEx.matchAt(line, j)
-            var num = 0
-            if (null == m) {
-                j++
-            } else {
-                num = m.value.toInt()
-
-                val s = max(0, j - 1)
-                val e = min(line.length, j + m.value.length + 1)
-
-                if (i > 0) {
-                    val gi = i-1
-                    val lineabovesegment = lines[gi].substring(s, e)
-                    for(it in gearEx.findAll(lineabovesegment)) {
-                        val gj = s+it.range.start
-                        gearNums.add(GeatAtHasNumAt(gi,gj,num,i,j))
-                    }
-                }
-
-                val beforeToAfter = lines[i].substring(s, e)
-                for(it in gearEx.findAll(beforeToAfter)) {
-                    val gj = s+it.range.start
-                    gearNums.add(GeatAtHasNumAt(i,gj,num,i,j))
-                }
-
-                if (i < lines.size - 1) {
-                    val linebelowsegment = lines[i + 1].substring(s, e)
-                    val gi = i+1
-                    for(it in gearEx.findAll(linebelowsegment)) {
-                        val gj = s+it.range.start
-                        gearNums.add(GeatAtHasNumAt(gi,gj,num,i,j))
-                    }
-                }
-
-                j += m.value.length
-            }
-        }
-    }
-    val groups =gearNums.groupBy { Pair(it.gi,it.gj) }
-    groups.forEach {
-        when(it.value.size) {
-            0 -> error("0 should not occur")
-            1 -> Unit //ignore
-            2 -> {
-                val ratio = it.value[0].num * it.value[1].num
-                total+=ratio
-            }
-            else -> error(">2 Not handled")
-        }
-    }
     println("Day 03 task 2: $total")
 }
