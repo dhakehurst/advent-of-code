@@ -1,28 +1,48 @@
 package day_04
 
 fun task2(lines: List<String>) {
+    val M_S = Regex("M.S")
+    val _A_ = Regex(".A.")
+    val S_M = Regex("S.M")
+    val S_S = Regex("S.S")
+    val M_M = Regex("M.M")
+    val grid = Grid<Char>(lines.map { it.toList() })
     var total = 0
-    val cardValue = mutableListOf<Int>()
-    val cardTotals = mutableMapOf<Int,Int>()
+    val windows = grid.windowsOfSize(3,3)
+    for (w in windows) {
+        var found1 = true
+        found1 = found1 && w.lines[0].joinToString(separator = "").matches(M_S)
+        found1 = found1 && w.lines[1].joinToString(separator = "").matches(_A_)
+        found1 = found1 && w.lines[2].joinToString(separator = "").matches(M_S)
+        if (found1) {
+            total+=1
+        }
 
-    for (i in lines.indices) {
-        val line = lines[i]
-        val cardNum = i+1
-        cardTotals[cardNum] = (cardTotals[cardNum] ?: 0 ) + 1
+        var found2 = true
+        found2 = found2 && w.lines[0].joinToString(separator = "").matches(S_M)
+        found2 = found2 && w.lines[1].joinToString(separator = "").matches(_A_)
+        found2 = found2 && w.lines[2].joinToString(separator = "").matches(S_M)
+        if (found2) {
+            total+=1
+        }
 
-        val goals = line.substringAfter(":").substringBefore("|").split(" ").mapNotNull{ it.trim().toIntOrNull() }
-        val nums = line.substringAfter("|").split(" ").mapNotNull{ it.trim().toIntOrNull() }
+        var found3 = true
+        found3 = found3 && w.lines[0].joinToString(separator = "").matches(S_S)
+        found3 = found3 && w.lines[1].joinToString(separator = "").matches(_A_)
+        found3 = found3 && w.lines[2].joinToString(separator = "").matches(M_M)
+        if (found3) {
+            total+=1
+        }
 
-        val wins = nums.filter { goals.contains(it) }
-        val value = wins.size
-        cardValue.add(value)
-        for(j in 1 .. value) {
-            val x = cardTotals[cardNum+j] ?: 0
-            cardTotals[cardNum+j] = x+cardTotals[cardNum]!!
+        var found4 = true
+        found4 = found4 && w.lines[0].joinToString(separator = "").matches(M_M)
+        found4 = found4 && w.lines[1].joinToString(separator = "").matches(_A_)
+        found4 = found4 && w.lines[2].joinToString(separator = "").matches(S_S)
+        if (found4) {
+            total+=1
         }
     }
 
-    total = cardTotals.values.sum()
 
     println(total)
 }

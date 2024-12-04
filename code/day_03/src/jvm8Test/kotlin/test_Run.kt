@@ -11,7 +11,7 @@ class test_Run {
 
     @BeforeTest
     fun before() = suspendTest {
-        lines = resourcesVfs["input.txt"].readLines().toList()
+        lines = resourcesVfs["input3.txt"].readLines().toList()
     }
 
     @Test
