@@ -1,33 +1,25 @@
 package day_18
 
+import advent.of.code.lib.Dir
+import advent.of.code.lib.Grid
+import advent.of.code.lib.PathEndPoint
 
-fun task1(lines: List<String>): Long {
 
-    val instructions = lines.map {
-        val split = it.split(" ")
-        val dir = Dir.valueOf(split[0])
-        val dist = split[1].toLong()
-        val col = split[2].trim('(', ')')
-        Instruction(dir, dist, col)
+fun task1(lines: List<String>): ULong {
+    val size = 71
+    val after = 1024
+    val taken = lines.take(after)
+    val maze = Grid(size,size,'.', { v -> if (v=='.') 1UL else null })
+    for (line in taken) {
+        val splt = line.split(",")
+        val x = splt[0].toInt()
+        val y = splt[1].toInt()
+        maze[x,y] = 'X'
     }
 
-    val vertices = mutableListOf<Vertix>()
-    vertices.add(Vertix(0, 0))
-    var v = vertices.first()
-    var perim = 1L
-    for (ins in instructions) {
-        val inc = ins.dist
-        perim += inc
-        v = when (ins.dir) {
-            Dir.U -> Vertix(v.x,v.y-inc).also { vertices.add(it) }
-            Dir.R -> Vertix(v.x+inc,v.y).also { vertices.add(it) }
-            Dir.D -> Vertix(v.x,v.y+inc).also { vertices.add(it) }
-            Dir.L -> Vertix(v.x-inc,v.y).also { vertices.add(it) }
-        }
-    }
+    val s1 = PathEndPoint<Char>(0, 0, 0u, Dir.R, 2, 0UL)
+    val s2 = PathEndPoint<Char>(0, 0, 0u, Dir.D, 2, 0UL)
+    val r = maze.shortestPath(listOf(s1,s2), Pair(size-1,size-1), '.', 0, size)
 
-    val area = area(vertices)
-
-
-    return area + (perim+1)/2
+    return r!!.cost
 }

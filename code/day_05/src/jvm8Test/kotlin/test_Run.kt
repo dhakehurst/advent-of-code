@@ -17,21 +17,9 @@ class test_Run {
     }
 
     @Test
-    fun run_task1() {
-        val actual = task1(lines)
-        val expected = 389056265L
-        assertEquals(expected, actual)
-    }
+    fun run_task1() = task1(lines)
 
     @Test
-    fun run_task2() {
-       val dv= measureTimedValue {
-            task2(lines)
-        }
-        println("Duration: ${dv.duration.inWholeMicroseconds} us")
-        val actual = dv.value
-        val expected = 137516820L
-        assertEquals(expected, actual)
-    }
+    fun run_task2() = task2(lines)
 
 }

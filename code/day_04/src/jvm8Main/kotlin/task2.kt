@@ -1,12 +1,14 @@
 package day_04
 
+import advent.of.code.lib.Grid
+
 fun task2(lines: List<String>) {
     val M_S = Regex("M.S")
     val _A_ = Regex(".A.")
     val S_M = Regex("S.M")
     val S_S = Regex("S.S")
     val M_M = Regex("M.M")
-    val grid = Grid<Char>(lines.map { it.toList() })
+    val grid = Grid<Char>(lines.map { it.toList() },{0UL})
     var total = 0
     val windows = grid.windowsOfSize(3,3)
     for (w in windows) {
